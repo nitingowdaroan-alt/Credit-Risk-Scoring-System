@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  # Credit Risk Scoring API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: credit-risk-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./configs:/app/configs
+      - ./reports:/app/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+      - MLFLOW_TRACKING_URI=sqlite:///mlruns/mlflow.db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - credit-risk-network
+    depends_on:
+      - mlflow
+
+  # MLflow Tracking Server
+  mlflow:
+    image: python:3.11-slim
+    container_name: credit-risk-mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlruns
+    working_dir: /mlruns
+    command: >
+      bash -c "pip install mlflow==2.9.0 &&
+               mlflow server
+               --backend-store-uri sqlite:///mlflow.db
+               --default-artifact-root /mlruns
+               --host 0.0.0.0
+               --port 5000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - credit-risk-network
+
+  # Monitoring Dashboard (Streamlit)
+  monitoring:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: credit-risk-monitoring
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./mlruns:/app/mlruns
+      - ./logs:/app/logs
+      - ./data:/app/data
+      - ./configs:/app/configs
+      - ./reports:/app/reports
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: >
+      bash -c "pip install streamlit &&
+               streamlit run src/monitoring/dashboard.py
+               --server.port 8501
+               --server.address 0.0.0.0"
+    restart: unless-stopped
+    networks:
+      - credit-risk-network
+    profiles:
+      - monitoring
+
+networks:
+  credit-risk-network:
+    driver: bridge
+
+volumes:
+  mlruns:
+  logs:
+  data:

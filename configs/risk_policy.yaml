@@ -1,0 +1,95 @@
+# Risk Policy Configuration
+# This file defines the credit scoring parameters and risk band thresholds
+
+# Score conversion parameters
+# Using "Points to Double the Odds" (PDO) methodology
+score_conversion:
+  # Base score at base odds (typically at reference point)
+  base_score: 600
+  # Base odds (odds at base_score, e.g., 50:1 means 1 default per 50 non-defaults)
+  base_odds: 50
+  # Points to Double the Odds (industry standard is typically 20-40)
+  pdo: 20
+  # Score range
+  min_score: 300
+  max_score: 850
+  # Factor and offset calculated from PDO
+  # factor = pdo / ln(2)
+  # offset = base_score - factor * ln(base_odds)
+
+# Risk bands based on credit score
+risk_bands:
+  low_risk:
+    name: "Low Risk"
+    decision: "auto_approve"
+    min_score: 700
+    max_score: 850
+    expected_default_rate: 0.02
+    description: "Excellent credit profile, auto-approve"
+    color: "green"
+
+  medium_risk:
+    name: "Medium Risk"
+    decision: "manual_review"
+    min_score: 600
+    max_score: 699
+    expected_default_rate: 0.08
+    description: "Good credit profile, requires manual review"
+    color: "yellow"
+
+  high_risk:
+    name: "High Risk"
+    decision: "decline"
+    min_score: 300
+    max_score: 599
+    expected_default_rate: 0.25
+    description: "Poor credit profile, decline or offer tighter terms"
+    color: "red"
+
+# Probability of Default thresholds (alternative to score thresholds)
+pd_thresholds:
+  low_risk_max_pd: 0.05      # PD <= 5%
+  medium_risk_max_pd: 0.15   # 5% < PD <= 15%
+  # high_risk: PD > 15%
+
+# Business rules and overrides
+business_rules:
+  # Minimum requirements for approval
+  min_requirements:
+    min_age: 18
+    max_age: 75
+    min_employment_duration_months: 3
+
+  # Hard decline rules (regardless of score)
+  hard_decline:
+    - "active_bankruptcy"
+    - "fraud_alert"
+    - "identity_not_verified"
+
+  # Factors that can upgrade/downgrade risk band
+  risk_modifiers:
+    existing_customer_upgrade: true
+    high_debt_ratio_downgrade_threshold: 0.5
+
+# Pricing by risk band (example)
+pricing:
+  low_risk:
+    apr_min: 0.05
+    apr_max: 0.08
+  medium_risk:
+    apr_min: 0.10
+    apr_max: 0.15
+  high_risk:
+    apr_min: 0.18
+    apr_max: 0.25
+
+# Model governance
+governance:
+  # Minimum performance requirements for production model
+  min_auc: 0.70
+  min_ks_statistic: 0.30
+  max_brier_score: 0.25
+
+  # Review frequency
+  model_review_frequency_days: 90
+  performance_monitoring_frequency_days: 7
