@@ -1,0 +1,139 @@
+# Hyperparameter configuration for model training
+
+# Data split configuration
+data_split:
+  test_size: 0.2
+  validation_size: 0.2
+  random_state: 42
+  stratify: true
+
+# Cross-validation settings
+cross_validation:
+  n_folds: 5
+  shuffle: true
+  random_state: 42
+
+# Optuna optimization settings
+optuna:
+  n_trials: 50
+  timeout: 3600  # 1 hour max
+  direction: "maximize"
+  metric: "roc_auc"
+  sampler: "TPESampler"
+  pruner: "MedianPruner"
+  pruner_params:
+    n_startup_trials: 5
+    n_warmup_steps: 5
+
+# Logistic Regression search space
+logistic_regression:
+  C:
+    type: "float"
+    low: 0.001
+    high: 100.0
+    log: true
+  penalty:
+    type: "categorical"
+    choices: ["l1", "l2"]
+  solver:
+    type: "categorical"
+    choices: ["saga"]
+  max_iter:
+    type: "int"
+    low: 100
+    high: 1000
+
+# XGBoost search space
+xgboost:
+  n_estimators:
+    type: "int"
+    low: 50
+    high: 500
+  max_depth:
+    type: "int"
+    low: 2
+    high: 10
+  learning_rate:
+    type: "float"
+    low: 0.01
+    high: 0.3
+    log: true
+  min_child_weight:
+    type: "int"
+    low: 1
+    high: 10
+  subsample:
+    type: "float"
+    low: 0.6
+    high: 1.0
+  colsample_bytree:
+    type: "float"
+    low: 0.6
+    high: 1.0
+  gamma:
+    type: "float"
+    low: 0.0
+    high: 5.0
+  reg_alpha:
+    type: "float"
+    low: 0.0
+    high: 10.0
+  reg_lambda:
+    type: "float"
+    low: 0.0
+    high: 10.0
+  scale_pos_weight:
+    type: "float"
+    low: 1.0
+    high: 10.0
+
+# LightGBM search space
+lightgbm:
+  n_estimators:
+    type: "int"
+    low: 50
+    high: 500
+  max_depth:
+    type: "int"
+    low: 2
+    high: 10
+  learning_rate:
+    type: "float"
+    low: 0.01
+    high: 0.3
+    log: true
+  num_leaves:
+    type: "int"
+    low: 10
+    high: 100
+  min_child_samples:
+    type: "int"
+    low: 5
+    high: 100
+  subsample:
+    type: "float"
+    low: 0.6
+    high: 1.0
+  colsample_bytree:
+    type: "float"
+    low: 0.6
+    high: 1.0
+  reg_alpha:
+    type: "float"
+    low: 0.0
+    high: 10.0
+  reg_lambda:
+    type: "float"
+    low: 0.0
+    high: 10.0
+  class_weight:
+    type: "categorical"
+    choices: ["balanced", null]
+
+# Calibration settings
+calibration:
+  method: "isotonic"  # or "sigmoid" for Platt scaling
+  cv: 5
+
+# Default model to use if not specified
+default_model: "lightgbm"

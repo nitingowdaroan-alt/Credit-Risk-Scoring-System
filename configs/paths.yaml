@@ -1,0 +1,31 @@
+# Data paths configuration
+data:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  external_dir: "data/external"
+
+  # Dataset files
+  raw_data: "data/raw/german_credit.csv"
+  train_data: "data/processed/train.csv"
+  validation_data: "data/processed/validation.csv"
+  test_data: "data/processed/test.csv"
+
+  # Feature store
+  feature_store: "data/processed/features.pkl"
+
+# Model paths
+models:
+  artifacts_dir: "mlruns"
+  registry_uri: "sqlite:///mlruns/mlflow.db"
+  tracking_uri: "sqlite:///mlruns/mlflow.db"
+
+# Reports paths
+reports:
+  drift_dir: "reports/drift"
+  training_dir: "reports/training"
+  explainability_dir: "reports/explainability"
+
+# Logs
+logs:
+  dir: "logs"
+  file: "logs/app.log"
